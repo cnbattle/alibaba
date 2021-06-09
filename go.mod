@@ -1,1 +1,1 @@
-module github.com/cnbattle/alibaba-open
+module github.com/cnbattle/alibabaopen
