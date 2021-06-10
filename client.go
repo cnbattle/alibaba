@@ -5,9 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"sort"
@@ -30,27 +28,8 @@ func (c *Client) SetMethod(method string) *Client {
 }
 
 func (c *Client) Do(uri string, params map[string]string) ([]byte, error) {
-	split := strings.Split(uri, ":")
-	spacename := split[0]
-	split = strings.Split(split[1], "-")
-	apiname := split[0]
-	version := split[1]
-	urlInfo := fmt.Sprintf("param2/%s/%s/%s/", version, spacename, apiname)
-	apiInfo := urlInfo + c.AppKey
-	params["access_token"] = c.AccessToken
-
-	var strs []string
-	for k := range params {
-		strs = append(strs, k)
-	}
-	sort.Strings(strs)
-	var signParamsStr string
-	v := url.Values{}
-	for _, k := range strs {
-		signParamsStr += k + params[k]
-		v.Set(k, params[k])
-	}
-	signStr := apiInfo + signParamsStr
+	apiInfo := c.handleURI(uri)
+	v, signStr := c.handleParams(params, apiInfo)
 	codeSign := strings.ToUpper(HmacSHA1(c.AppSecret, signStr))
 	if c.method == "GET" {
 		v.Set("_aop_signature", codeSign)
@@ -63,13 +42,7 @@ func (c *Client) Do(uri string, params map[string]string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Panicln(err)
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -77,7 +50,34 @@ func (c *Client) Do(uri string, params map[string]string) ([]byte, error) {
 	return body, nil
 }
 
-// HmacSHA1 HmacSHA1
+func (c *Client) handleParams(params map[string]string, apiInfo string) (url.Values, string) {
+	params["access_token"] = c.AccessToken
+	var strs []string
+	for k := range params {
+		strs = append(strs, k)
+	}
+	sort.Strings(strs)
+	var signParamsStr string
+	v := url.Values{}
+	for _, k := range strs {
+		signParamsStr += k + params[k]
+		v.Set(k, params[k])
+	}
+	signStr := apiInfo + signParamsStr
+	return v, signStr
+}
+
+func (c *Client) handleURI(uri string) string {
+	split := strings.Split(uri, ":")
+	spacename := split[0]
+	split = strings.Split(split[1], "-")
+	apiname := split[0]
+	version := split[1]
+	urlInfo := fmt.Sprintf("param2/%s/%s/%s/", version, spacename, apiname)
+	apiInfo := urlInfo + c.AppKey
+	return apiInfo
+}
+
 func HmacSHA1(key string, data string) string {
 	mac := hmac.New(sha1.New, []byte(key))
 	mac.Write([]byte(data))
