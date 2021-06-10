@@ -1,1 +1,1 @@
-module github.com/cnbattle/alibaba
+module ruan.co/alibaba

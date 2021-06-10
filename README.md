@@ -7,7 +7,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/cnbattle/alibaba/open"
+    
+	"ruan.co/alibaba/open"
 )
 
 func main() {
