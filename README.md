@@ -7,11 +7,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/cnbattle/alibabaopen"
+	"github.com/cnbattle/alibaba/open"
 )
 
 func main() {
-    client := &alibabaopen.Client{
+    client := &open.Client{
         AppKey:      "4790000",
         AppSecret:   "xxxxx",
         AccessToken: "xxxxxxxx-eb92-4b15-857c-f0e89f5c7684",

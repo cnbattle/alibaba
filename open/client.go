@@ -1,4 +1,4 @@
-package alibabaopen
+package open
 
 import (
 	"crypto/hmac"
