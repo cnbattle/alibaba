@@ -1,3 +1,3 @@
-module ruan.co/alibaba
+module github.com/cnbattle/alibaba
 
-go 1.16
+go 1.17
